@@ -7,10 +7,9 @@ import EntryLines from "./components/EntryLines";
 import MainHeader from "./components/MainHeader";
 import ModalEdit from "./components/ModalEdit";
 import NewEntryForm from "./components/NewEntryForm";
-import { createStore, combineReducers } from "redux";
+import { useSelector } from "react-redux";
 
 function App() {
-  const [entries, setEntries] = useState(initialEntries);
   const [description, setDescription] = useState("");
   const [value, setValue] = useState("");
   const [isExpense, setIsExpense] = useState(true);
@@ -19,6 +18,7 @@ function App() {
   const [incomeTotal, setIncomeTotal] = useState(0);
   const [expenseTotal, setExpenseTotal] = useState(0);
   const [total, setTotal] = useState(0);
+  const entries = useSelector((state) => state.entries);
 
   useEffect(() => {
     if (!isOpen && entryId) {
@@ -27,7 +27,7 @@ function App() {
       newEntries[index].description = description;
       newEntries[index].value = value;
       newEntries[index].isExpense = isExpense;
-      setEntries(newEntries);
+      //setEntries(newEntries);
       resetEntry();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,57 +47,6 @@ function App() {
     setExpenseTotal(totalExpenses);
     setIncomeTotal(totalIncome);
   }, [entries]);
-
-  function entriesReducer(state = initialEntries, action) {
-    let newEntries;
-    switch (action.type) {
-      case "ADD_ENTRY":
-        newEntries = state.concat(action.payload);
-        return newEntries;
-      case "REMOVE_ENTRY":
-        newEntries = state.filter((entry) => entry.id !== action.payload.id);
-        return newEntries;
-      default:
-        return state;
-    }
-  }
-
-  const combinedReducers = combineReducers({
-    entries: entriesReducer,
-  });
-
-  const store = createStore(combinedReducers);
-
-  store.subscribe(() => {
-    console.log("store", store.getState());
-  });
-
-  const payload_add = {
-    id: 5,
-    description: "Hello from redux",
-    value: 100,
-    isExpense: false,
-  };
-
-  const payload_remove = {
-    id: 1,
-  };
-
-  function addEntryRedux(payload) {
-    return { type: "ADD_ENTRY", payload };
-  }
-
-  function removeEntryRedux(id) {
-    return { type: "REMOVE_ENTRY", payload: { id } };
-  }
-
-  store.dispatch(addEntryRedux(payload_add));
-  store.dispatch(removeEntryRedux(1));
-
-  function deleteEntry(id) {
-    const result = entries.filter((entry) => entry.id !== id);
-    setEntries(result);
-  }
 
   function editEntry(id) {
     console.log(`edit entry with id ${id}`);
@@ -119,7 +68,7 @@ function App() {
       value,
       isExpense,
     });
-    setEntries(result);
+    //setEntries(result);
     resetEntry();
   }
 
@@ -139,11 +88,7 @@ function App() {
 
       <MainHeader title="History" type="h3" />
 
-      <EntryLines
-        entries={entries}
-        deleteEntry={deleteEntry}
-        editEntry={editEntry}
-      />
+      <EntryLines entries={entries} editEntry={editEntry} />
 
       <MainHeader title="Add new transaction" type="h3" />
 
@@ -173,10 +118,3 @@ function App() {
 }
 
 export default App;
-
-var initialEntries = [
-  { id: 1, description: "Work income", value: 1000.0, isExpense: false },
-  { id: 2, description: "Water bill", value: 20, isExpense: true },
-  { id: 3, description: "Rent", value: 200, isExpense: true },
-  { id: 4, description: "Power bill", value: 50, isExpense: true },
-];
